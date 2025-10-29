@@ -1,0 +1,136 @@
+{
+  "driver": {
+    "id": "integer",
+    "forename": "text",
+    "surname": "text",
+    "reference": "text",
+    "abbreviation": "text",
+    "nationality": "text",
+    "country_code": "text",
+    "permanent_car_number": "smallint",
+    "date_of_birth": "date"
+  },
+  "team": {
+    "id": "integer",
+    "name": "text",
+    "nationality": "text",
+    "reference": "text",
+    "country_code": "text"
+  },
+  "season": {
+    "id": "integer",
+    "year": "integer"
+  },
+  "circuit": {
+    "id": "integer",
+    "name": "text",
+    "reference": "text",
+    "country": "text",
+    "country_code": "text",
+    "locality": "text",
+    "latitude": "float",
+    "longitude": "float",
+    "altitude": "float"
+  },
+  "round": {
+    "id": "integer",
+    "season_id": "integer",
+    "circuit_id": "integer",
+    "name": "text",
+    "date": "date",
+    "number": "integer",
+    "race_number": "integer"
+  },
+  "session": {
+    "id": "integer",
+    "round_id": "integer",
+    "number": "integer",
+    "type": "text",
+    "scheduled_laps": "integer",
+    "timestamp": "timestamp",
+    "timezone": "text",
+    "is_cancelled": "boolean"
+  },
+  "team_driver": {
+    "id": "integer",
+    "team_id": "integer",
+    "driver_id": "integer",
+    "season_id": "integer"
+  },
+  "driver_championship": {
+    "id": "integer",
+    "season_id": "integer",
+    "round_id": "integer",
+    "session_id": "integer",
+    "driver_id": "integer",
+    "round_number": "integer",
+    "session_number": "integer",
+    "year": "integer",
+    "position": "smallint",
+    "points": "float",
+    "win_count": "integer"
+  },
+  "team_championship": {
+    "id": "integer",
+    "season_id": "integer",
+    "round_id": "integer",
+    "session_id": "integer",
+    "team_id": "integer",
+    "round_number": "integer",
+    "session_number": "integer",
+    "year": "integer",
+    "position": "integer",
+    "points": "float",
+    "win_count": "integer"
+  },
+  "race_result": {
+    "id": "integer",
+    "season_id": "integer",
+    "round_id": "integer",
+    "session_id": "integer",
+    "driver_id": "integer",
+    "team_id": "integer",
+    "position": "integer",
+    "position_text": "text",
+    "points": "float",
+    "grid_position": "integer",
+    "laps_completed": "integer",
+    "status": "text",
+    "race_time_milliseconds": "integer",
+    "fastest_lap_time": "text",
+    "fastest_lap_milliseconds": "integer",
+    "fastest_lap_number": "integer",
+    "fastest_lap_rank": "integer"
+  },
+  "qualifying_result": {
+    "id": "integer",
+    "season_id": "integer",
+    "round_id": "integer",
+    "last_session_id": "integer",
+    "driver_id": "integer",
+    "team_id": "integer",
+    "position": "integer",
+    "q1_time": "text",
+    "q1_time_milliseconds": "integer",
+    "q2_time": "text",
+    "q2_time_milliseconds": "integer",
+    "q3_time": "text",
+    "q3_time_milliseconds": "integer"
+  },
+  "sprint_result": {
+    "id": "integer",
+    "season_id": "integer",
+    "round_id": "integer",
+    "session_id": "integer",
+    "driver_id": "integer",
+    "team_id": "integer",
+    "position": "integer",
+    "position_text": "text",
+    "position_order": "integer",
+    "points": "float",
+    "grid_position": "integer",
+    "laps_completed": "integer",
+    "status": "text",
+    "sprint_time_milliseconds": "integer"
+  }
+}
