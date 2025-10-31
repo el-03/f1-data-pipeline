@@ -333,6 +333,12 @@ Examples:
         help='Specific round number'
     )
 
+    parser.add_argument(
+        '--force',
+        action='store_true',
+        help='Force loading even if not needed'
+    )
+
     args = parser.parse_args()
 
     # Validate arguments

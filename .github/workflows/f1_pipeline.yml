@@ -1,0 +1,147 @@
+name: F1 Data Pipeline
+
+on:
+  schedule:
+    # Pre-season: February 20th at midnight UTC
+    # Loads all static data for the new season
+    - cron: '0 0 20 2 *'
+
+    # Post-race check: Every day at 10 AM UTC (March-December)
+    # Runs daily during F1 season, metadata decides if loading is needed
+    - cron: '0 10 * 3-12 *'
+
+  # Allow manual triggers via GitHub UI
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Pipeline mode'
+        required: true
+        default: 'post_race'
+        type: choice
+        options:
+          - pre_season
+          - post_race
+      year:
+        description: 'Season year'
+        required: false
+        default: '2025'
+      force:
+        description: 'Force reload (ignore metadata checks)'
+        required: false
+        type: boolean
+        default: false
+
+# Only allow one pipeline run at a time
+concurrency:
+  group: f1-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    # Set timeout to prevent hanging jobs
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Determine pipeline mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            # Scheduled run - determine mode by date and cron expression
+            MONTH=$(date +%m)
+            DAY=$(date +%d)
+            
+            if [ "$MONTH" == "02" ] && [ "$DAY" == "20" ]; then
+              echo "mode=pre_season" >> $GITHUB_OUTPUT
+              echo "🎊 Running PRE-SEASON mode (February 20th)"
+            else
+              echo "mode=post_race" >> $GITHUB_OUTPUT
+              echo "🏁 Running POST-RACE mode (daily check)"
+            fi
+          else
+            # Manual trigger - use input
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+            echo "🔧 Running ${{ inputs.mode }} mode (manual trigger)"
+          fi
+
+      - name: Set database credentials
+        run: |
+          echo "Setting up database connection..."
+          # Credentials are securely stored in GitHub Secrets
+
+      - name: Run F1 Data Pipeline
+        id: pipeline
+        env:
+          USER: ${{ secrets.DB_USER }}
+          PASSWORD: ${{ secrets.DB_PASSWORD }}
+          HOST: ${{ secrets.DB_HOST }}
+          PORT: ${{ secrets.DB_PORT }}
+          DBNAME: ${{ secrets.DB_NAME }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          MODE=${{ steps.mode.outputs.mode }}
+          YEAR=${{ inputs.year || '2024' }}
+          FORCE_FLAG=""
+          
+          if [ "${{ inputs.force }}" == "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          
+          echo "================================"
+          echo "🏎️  F1 Data Pipeline"
+          echo "================================"
+          echo "Mode: $MODE"
+          echo "Year: $YEAR"
+          echo "Force: ${{ inputs.force }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "================================"
+          echo ""
+          
+          python scripts/main.py --mode $MODE --year $YEAR $FORCE_FLAG
+
+      - name: Check for failures
+        if: failure()
+        run: |
+          echo "❌ Pipeline execution failed!"
+          echo "Check the logs above for details."
+          echo "Run ID: ${{ github.run_id }}"
+          echo "View logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          exit 1
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "✅ Pipeline executed successfully!"
+          echo "Mode: ${{ steps.mode.outputs.mode }}"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+
+  # Optional: Notify on failure (uncomment and configure if needed)
+  # notify-on-failure:
+  #   runs-on: ubuntu-latest
+  #   needs: run-pipeline
+  #   if: failure()
+  #   steps:
+  #     - name: Send notification
+  #       run: |
+  #         echo "Send Slack/Discord/Email notification here"
+  #         # Example for Slack:
+  #         # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+  #         #   -H 'Content-Type: application/json' \
+  #         #   -d '{"text":"🚨 F1 Pipeline failed! <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>"}'
