@@ -165,13 +165,13 @@ LOAD_MODES = {
 
 # Database configuration
 load_dotenv()
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
-SCHEMA = os.getenv("schema")
-SCHEMA_METADATA = os.getenv("schema_metadata")
+USER = os.getenv("USER_SB")
+PASSWORD = os.getenv("PASSWORD")
+HOST = os.getenv("HOST")
+PORT = os.getenv("PORT")
+DBNAME = os.getenv("DBNAME")
+SCHEMA = os.getenv("SCHEMA")
+SCHEMA_METADATA = os.getenv("SCHEMA_METADATA")
 
 # API configuration
 JOLPICA_API_BASE = "https://api.jolpi.ca/ergast/f1"

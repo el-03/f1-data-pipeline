@@ -87,11 +87,13 @@ jobs:
       - name: Run F1 Data Pipeline
         id: pipeline
         env:
-          USER: ${{ secrets.DB_USER }}
+          USER_SB: ${{ secrets.DB_USER }}
           PASSWORD: ${{ secrets.DB_PASSWORD }}
           HOST: ${{ secrets.DB_HOST }}
           PORT: ${{ secrets.DB_PORT }}
           DBNAME: ${{ secrets.DB_NAME }}
+          SCHEMA: formula_one
+          SCHEMA_METADATA: formula_one_pipeline_metadata
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
