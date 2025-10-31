@@ -15,9 +15,6 @@ from dotenv import load_dotenv
 class LoadStrategy(Enum):
     """Loading frequency strategies"""
     PRE_SEASON = "pre_season"
-    RACE_WEEK = "race_week"
-    POST_SPRINT = "post_race"
-    POST_QUALIFYING = "post_race"
     POST_RACE = "post_race"
 
 
@@ -100,7 +97,7 @@ TABLES = {
     "sprint_result": TableConfig(
         name="sprint_result",
         schema="formula_one",
-        strategy=LoadStrategy.POST_SPRINT,
+        strategy=LoadStrategy.POST_RACE,
         api_endpoint="/{year}/{round}/sprint.json",
         dependencies=["team", "round", "session"],
         description="Sprint result"
@@ -109,7 +106,7 @@ TABLES = {
     "qualifying_result": TableConfig(
         name="qualifying_result",
         schema="formula_one",
-        strategy=LoadStrategy.POST_QUALIFYING,
+        strategy=LoadStrategy.POST_RACE,
         api_endpoint="/{year}/{round}/qualifying.json",
         dependencies=["team", "round", "session"],
         description="Qualifying result"
@@ -164,8 +161,6 @@ LOAD_MODES = {
     "all": LOAD_ORDER,
     "pre_season": ["circuit", "season", "round", "session", "team", "driver", "team_driver"],
     "post_race": ["sprint_result", "qualifying_result", "race_result", "driver_championship", "team_championship"],
-    # "post_sprint": ["sprint_result", "driver_championship", "team_championship"],
-    # "post_qualifying": ["qualifying_result"],
 }
 
 # Database configuration

@@ -58,13 +58,14 @@ class F1Pipeline:
             'team_championship': TeamChampionshipLoader(conn, api_client, metadata_manager),
         }
 
-    def run_mode(self, mode: str, year: int = CURRENT_SEASON) -> Dict:
+    def run_mode(self, mode: str, year: int = CURRENT_SEASON, force: bool = False) -> Dict:
         """
         Run pipeline in specific mode
 
         Args:
             mode: Loading mode ('pre_season', 'post_race', etc.)
             year: Season year to process
+            force: Force loading even if not needed
 
         Returns:
             Dict with results summary
@@ -106,7 +107,7 @@ class F1Pipeline:
 
         # Process each table
         for table_name in tables_to_load:
-            result = self._process_table(table_name, year, mode, raw_zip=raw_zip)
+            result = self._process_table(table_name, year, mode, force, raw_zip=raw_zip)
             results['details'].append(result)
             results['tables_processed'] += 1
 
@@ -165,7 +166,7 @@ class F1Pipeline:
 
         return success
 
-    def _process_table(self, table_name: str, year: int, mode: str, **kwargs) -> Dict:
+    def _process_table(self, table_name: str, year: int, mode: str, force: bool, **kwargs) -> Dict:
         """
         Process a single table
 
@@ -183,8 +184,13 @@ class F1Pipeline:
         start_time = datetime.now()
 
         try:
-            # Determine what to pass to loader
-            kwargs['year'] = year
+            # Check if we should load this table
+            should_load = force or self.metadata.should_load(table_name, year)
+
+            if not should_load:
+                print(f"⏭️  Skipping {table_name} (not needed based on strategy)")
+                result['status'] = 'skipped'
+                return result
 
             # Get the loader
             loader = self.loaders.get(table_name)
@@ -193,6 +199,9 @@ class F1Pipeline:
                 result['status'] = 'failed'
                 result['error'] = 'No loader available'
                 return result
+
+            # Determine what to pass to loader
+            kwargs['year'] = year
 
             # For post-race modes, get the next round to load
             if mode in ['post_race']:
