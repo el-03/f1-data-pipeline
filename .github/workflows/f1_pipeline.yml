@@ -39,6 +39,7 @@ concurrency:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
+    environment: f1-data-pipeline
 
     # Set timeout to prevent hanging jobs
     timeout-minutes: 30
