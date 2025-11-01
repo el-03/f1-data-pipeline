@@ -284,8 +284,7 @@ class MetadataManager:
             # Check if this race is newer than our last sync
             race_happened_after_sync = race_datetime > (last_sync - timedelta(days=1))
 
-            # return race_happened_after_sync
-            return True
+            return race_happened_after_sync
 
         finally:
             cur.close()

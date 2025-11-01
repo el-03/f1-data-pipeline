@@ -35,13 +35,16 @@ CREATE INDEX idx_sync_log_timestamp ON "formula_one_pipeline_metadata"."sync_log
 -- INITIALIZE TRACKING FOR YOUR TABLES
 -- ============================================
 
-INSERT INTO "formula_one_pipeline_metadata"."sync_status" (entity_name, status, last_season_year) VALUES
-  ('circuit', 'pending', 2024),
-  ('season', 'pending', 2024),
-  ('team', 'pending', 2024),
-  ('driver', 'pending', 2024),
-  ('round', 'pending', 2024),
-  ('session', 'pending', 2024),
-  ('driver_championship', 'pending', 2024),
-  ('team_championship', 'pending', 2024),
-  ('team_driver', 'pending', 2024);
+INSERT INTO "formula_one_pipeline_metadata"."sync_status" (entity_name, status, last_season_year, last_round_number) VALUES
+  ('circuit', 'success', 2025),
+  ('team', 'success', 2025),
+  ('driver', 'success', 2025),
+  ('team_driver', 'success', 2025);
+  ('season', 'success', 2025),
+  ('round', 'success', 2025),
+  ('session', 'success', 2025),
+  ('sprint_result', 'success', 2025, 20),
+  ('qualifying_result', 'success', 2025, 20),
+  ('race_result', 'success', 2025, 20),
+  ('driver_championship', 'success', 2025, 20),
+  ('team_championship', 'success', 2025, 20),
