@@ -366,7 +366,7 @@ class RaceResultLoader(BaseLoader):
         season_id = season_map.get(season_year)
         round_id = round_map.get((season_year, round_num))
         session_id = session_map.get(round_id)["id"]
-        session_num = session_map.get(round_id)["number"]
+
 
         for result in race_results:
             driver_ref = result.get("Driver", {}).get("driverId")
