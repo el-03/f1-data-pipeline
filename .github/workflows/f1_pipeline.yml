@@ -116,7 +116,7 @@ jobs:
           echo "================================"
           echo ""
           
-          python scripts/main.py --mode $MODE --year $YEAR $FORCE_FLAG
+          python main.py --mode $MODE --year $YEAR $FORCE_FLAG
 
       - name: Check for failures
         if: failure()
