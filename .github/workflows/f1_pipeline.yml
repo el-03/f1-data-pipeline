@@ -89,11 +89,11 @@ jobs:
         env:
           USER_SB: ${{ secrets.DB_USER }}
           PASSWORD: ${{ secrets.DB_PASSWORD }}
-          HOST: ${{ secrets.DB_HOST }}
-          PORT: ${{ secrets.DB_PORT }}
-          DBNAME: ${{ secrets.DB_NAME }}
-          SCHEMA: formula_one
-          SCHEMA_METADATA: formula_one_pipeline_metadata
+          HOST: ${{ vars.DB_HOST }}
+          PORT: ${{ vars.DB_PORT }}
+          DBNAME: ${{ vars.DB_NAME }}
+          SCHEMA: ${{ vars.SCHEMA }}
+          SCHEMA_METADATA: ${{ vars.SCHEMA_METADATA }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
