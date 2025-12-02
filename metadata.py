@@ -241,7 +241,7 @@ class MetadataManager:
         # Default: load it
         return True
 
-    def _was_there_race_since_last_sync(self, season_year: int, last_sync: datetime, buffer_days: int = 3) -> bool:
+    def _was_there_race_since_last_sync(self, season_year: int, last_sync: datetime, buffer_days: int = 2) -> bool:
         """
         Check if there was a race X days ago (for championship standings with penalty window)
 
@@ -289,7 +289,7 @@ class MetadataManager:
         finally:
             cur.close()
 
-    def _was_there_sprint_since_last_sync(self, season_year: int, last_sync: datetime, buffer_days: int = 3) -> bool:
+    def _was_there_sprint_since_last_sync(self, season_year: int, last_sync: datetime, buffer_days: int = 2) -> bool:
         """
         Check if there was a sprint race since last sync
 

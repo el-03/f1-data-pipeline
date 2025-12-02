@@ -4,11 +4,7 @@ All data loaders for F1 pipeline
 """
 import zipfile
 from abc import ABC
-from html.entities import entitydefs
 from typing import Any, List, Dict
-
-from requests import session
-
 from loaders.base_loader import BaseLoader
 from infra.schema.schema_loader import SchemaLoader
 import pandas as pd
@@ -367,7 +363,6 @@ class RaceResultLoader(BaseLoader):
         round_id = round_map.get((season_year, round_num))
         session_id = session_map.get(round_id)["id"]
 
-
         for result in race_results:
             driver_ref = result.get("Driver", {}).get("driverId")
             constructor_ref = result.get("Constructor", {}).get("constructorId")
@@ -439,7 +434,6 @@ class RaceResultLoader(BaseLoader):
             raise e
         finally:
             cur.close()
-
 
 
 class DriverChampionshipLoader(BaseLoader):
