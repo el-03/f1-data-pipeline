@@ -44,22 +44,63 @@ class PreSeasonLoader(BaseLoader, ABC):
         cur = self.conn.cursor()
 
         try:
-            sql_count = f"""SELECT COUNT(*) FROM {SCHEMA}.{entity_name};"""
-            cur.execute(sql_count)
-            rows = cur.fetchall()
+            # Use actual table columns so inserts always match DB schema.
+            cur.execute(
+                """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = %s
+                  AND table_name = %s
+                ORDER BY ordinal_position;
+                """,
+                (SCHEMA, entity_name),
+            )
+            columns = [row[0] for row in cur.fetchall()]
+            if not columns:
+                self.conn.commit()
+                return 0
 
-            count = len(df) - rows[0][0]
+            # Keep only table columns present in the CSV and require an id to dedupe on.
+            insert_columns = [col for col in columns if col in df.columns]
+            if "id" not in insert_columns:
+                self.conn.commit()
+                return 0
+
+            # Add only rows whose id does not already exist in the target table.
+            cur.execute(f"SELECT id FROM {SCHEMA}.{entity_name};")
+            existing_ids = {row[0] for row in cur.fetchall()}
+            candidate_df = df[insert_columns].copy()
+            candidate_df = candidate_df[candidate_df["id"].notna()]
+            candidate_df = candidate_df[~candidate_df["id"].isin(existing_ids)]
+            candidate_df = candidate_df.drop_duplicates(subset=["id"], keep="first")
+
+            cols = ",".join(insert_columns)
+            vals = ",".join(["%s"] * len(insert_columns))
+            sql = f"""
+                INSERT INTO {SCHEMA}.{entity_name} ({cols})
+                VALUES ({vals})
+                ON CONFLICT DO NOTHING;
+            """
+
+            count = 0
+            savepoint_idx = 0
+            for _, row in candidate_df.iterrows():
+                # Convert pandas NA/NaN to SQL NULL.
+                values = [None if pd.isna(v) else v for v in row.tolist()]
+                sp_name = f"sp_{entity_name}_{savepoint_idx}"
+                savepoint_idx += 1
+
+                cur.execute(f"SAVEPOINT {sp_name};")
+                try:
+                    cur.execute(sql, tuple(values))
+                    count += cur.rowcount
+                    cur.execute(f"RELEASE SAVEPOINT {sp_name};")
+                except Exception:
+                    # Row violates table rules (FK/NOT NULL/type/check/etc.) -> skip it.
+                    cur.execute(f"ROLLBACK TO SAVEPOINT {sp_name};")
+                    cur.execute(f"RELEASE SAVEPOINT {sp_name};")
+
             if count > 0:
-                cur.execute(f"""SELECT * FROM {SCHEMA}.{entity_name} LIMIT 1;""")
-                columns = [desc[0] for desc in cur.description]
-                diff_df = df[columns].tail(count)
-
-                for _, row in diff_df.iterrows():
-                    cols = ",".join(columns)
-                    vals = ",".join(["%s"] * len(columns))
-                    sql = f"INSERT INTO {SCHEMA}.{entity_name} ({cols}) VALUES ({vals}) ON CONFLICT (id) DO NOTHING;"
-                    cur.execute(sql, tuple(row))
-
                 # Reset ID sequence
                 sql_reset_seq = f"SELECT setval('{SCHEMA}.{entity_name}_id_seq', (SELECT COALESCE(MAX(id), 0) FROM {SCHEMA}.{entity_name}));"
                 cur.execute(sql_reset_seq)
